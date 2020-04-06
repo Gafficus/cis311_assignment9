@@ -1,20 +1,80 @@
-﻿Imports Microsoft.Office.Interop
+﻿'------------------------------------------------------------
+'-                File Name : modMain.vb                    - 
+'-                Part of Project: Assign9                  -
+'------------------------------------------------------------
+'-                Written By: Nathan Gaffney                -
+'-                Written On: 5 Apr 2020                    -
+'------------------------------------------------------------
+'- File Purpose:                                            -
+'- This file contains the main application driver, where the-
+'- user can decide to use hard coded data or to use a file  -
+'- which supplies the data,                                 -
+'------------------------------------------------------------
+'- Program Purpose:                                         -
+'-                                                          -
+'- This program will create an excel file from either       -
+'- supplied data or hard-coded data, it will display this   -
+'- data to the user, and then it will perform basic stats   -
+'- on the data.                                             -
+'------------------------------------------------------------
+'- Global Variable Dictionary (alphabetically):             -
+'- anExcel –the excel file to be created                    –
+'- fileName – the file name to be loaded "ToyOrder.txt"     –
+'- mySalesForce – holds a list of employess and their sales –
+'------------------------------------------------------------
+Imports Microsoft.Office.Interop
+
 Module modMain
     Dim anExcel As Excel.Application
-
     Dim mySalesForce As New List(Of clsSalesperson)
+    Dim fileName As String = "ToyOrder.txt"
+    '------------------------------------------------------------
+    '-                Subprogram Name: Main     -
+    '------------------------------------------------------------
+    '-                Written By: Nathan Gaffney                -
+    '-                Written On: 6 Apr 2020                    -
+    '------------------------------------------------------------
+    '- Subprogram Purpose:                                      -
+    '-                                                          -
+    '- This subroutine calls the necessary functions to write   -
+    '- an excel file and perform basic statistical analysis on  -
+    '- the data either hard coded into the program or supplied  -
+    '- by the user i the form of a file named ToyOrder.txt      -
+    '------------------------------------------------------------
+    '- Parameter Dictionary (in parameter order):               -
+    '- (None)                                                   -
+    '------------------------------------------------------------
+    '- Local Variable Dictionary (alphabetically):              -
+    '- anExcel - the excel file                                 -
+    '- strResponse – Users response to if they want to load file–
+    '------------------------------------------------------------
     Sub Main()
+        Dim strResponse As String
         Console.WriteLine("Loading Excel...")
         anExcel = New Excel.Application()
-        createSalesForce()
+
+        Do
+            Console.Write("Would you like to load data from file? Y/N: ")
+            strResponse = Console.ReadKey().Key
+            Console.WriteLine()
+        Loop While strResponse <> ConsoleKey.Y And strResponse <> ConsoleKey.N ' And strResponse <> "N" And strResponse <> "n"
+        If strResponse = ConsoleKey.Y Then
+            Try
+                Console.WriteLine("Loading 'ToyOrder.txt'...")
+                readSalesInformation(fileName)
+            Catch ex As Exception
+                Console.WriteLine("Problem Opening File. Using hard coded data.")
+                createSalesForce()
+            End Try
+        Else
+            createSalesForce()
+        End If
+
         anExcel.Workbooks.Add()
-        anExcel.Sheets.Add()
         Console.WriteLine("Writting data to Excel...")
         createHeader()
         Dim intLastRow As Integer = createMainData()
         createFormulaHeaders(intLastRow)
-        createSalesForceSales(intLastRow)
-        createSalesForceQuantity()
         Console.WriteLine("Opening Excel...")
         anExcel.Visible = True
         Console.WriteLine("Press Any Key To Exit.")
@@ -22,17 +82,84 @@ Module modMain
         anExcel.Quit()
         anExcel = Nothing
     End Sub
-
-
-    Private Sub createSalesForceSales(ByVal intLastRow)
-
+    '------------------------------------------------------------
+    '-                Subprogram Name: readSalesInformation     -
+    '------------------------------------------------------------
+    '-                Written By: Nathan Gaffney                -
+    '-                Written On: 6 Apr 2020                    -
+    '------------------------------------------------------------
+    '- Subprogram Purpose:                                      -
+    '-                                                          -
+    '- This subroutine creates the salesforce by reading from   -
+    '- a file.                                                  -
+    '------------------------------------------------------------
+    '- Parameter Dictionary (in parameter order):               -
+    '- fileName - Name of teh file to be read                   -
+    '------------------------------------------------------------
+    '- Local Variable Dictionary (alphabetically):              -
+    '- fullPath - this will hold the full path to the file      -
+    '- objMyStreamReader - holds the reader                     -
+    '- strLineContents - the contents of the line space delimited-
+    '- strContents - contents of the line as array              -
+    '------------------------------------------------------------
+    Private Sub readSalesInformation(ByVal fileName)
+        Dim objMyStreamReader As System.IO.StreamReader
+        Dim strLineContents As String
+        'Create path string as shown by MSDN
+        Dim fullPath As String
+        'Combine as shown by MSDN
+        fullPath = My.Computer.FileSystem.CombinePath(My.Application.Info.DirectoryPath, fileName)
+        objMyStreamReader = System.IO.File.OpenText(fullPath)
+        While Not (objMyStreamReader.EndOfStream)
+            strLineContents = objMyStreamReader.ReadLine()
+            Debug.WriteLine("1")
+            Dim strContents() As String = Split(strLineContents, " ")
+            Debug.WriteLine(strContents)
+            'Create a salesperson with the inofrmation
+            mySalesForce.Add(New clsSalesperson(strContents(employee.strFirstName),
+                                                strContents(employee.strLastName),
+                                                strContents(employee.intOrderID),
+                                                strContents(employee.intID),
+                                                strContents(employee.sngGamesSales),
+                                                strContents(employee.intGamesQuantity),
+                                                strContents(employee.sngDollsSales),
+                                                strContents(employee.intDollsQuantity),
+                                                strContents(employee.sngBuildingSales),
+                                                strContents(employee.intBuildingQuantity),
+                                                strContents(employee.sngModelSales),
+                                                strContents(employee.intModelQuantity)))
+        End While
+        objMyStreamReader.Close()
+        Console.WriteLine("File loaded successfully.")
     End Sub
-    Private Sub createSalesForceQuantity()
-
-    End Sub
+    '------------------------------------------------------------
+    '-                Subprogram Name: createMainData           -
+    '------------------------------------------------------------
+    '-                Written By: Nathan Gaffney                -
+    '-                Written On: 6 Apr 2020                    -
+    '------------------------------------------------------------
+    '- Subprogram Purpose:                                      -
+    '-                                                          -
+    '- This subroutine creates a will write the data of         -
+    '- sales force to the excel file.                           -
+    '------------------------------------------------------------
+    '- Parameter Dictionary (in parameter order):               -
+    '- (None)                                                   -
+    '------------------------------------------------------------
+    '- Local Variable Dictionary (alphabetically):              -
+    '- intCol - this will hold the column value                 -
+    '- intColumnOfdata1 - Where the first section of aggregate  -
+    '- functions starts.                                        -
+    '- intColumnOfData2 - the second batch of aggregate function-
+    '- intRow - this will hold the row value                    -
+    '------------------------------------------------------------
+    '------------------------------------------------------------
+    '- Returns:                                                 -
+    '- intRow – telling where the last row is                   -
+    '------------------------------------------------------------
     Private Function createMainData()
         Dim intRow = 1
-        Dim intCol = 1
+        Dim intCol = column.A
         Dim intColumOfData1 As Integer
         Dim intColumOfData2 As Integer
         intRow += 1
@@ -89,6 +216,23 @@ Module modMain
         Next
         Return intRow
     End Function
+    '------------------------------------------------------------
+    '-                Subprogram Name: createHeader             -
+    '------------------------------------------------------------
+    '-                Written By: Nathan Gaffney                -
+    '-                Written On: 5 Apr 2020                    -
+    '------------------------------------------------------------
+    '- Subprogram Purpose:                                      -
+    '-                                                          -
+    '- This subroutine creates a will write the headers         -
+    '------------------------------------------------------------
+    '- Parameter Dictionary (in parameter order):               -
+    '- (None)                                                   -
+    '------------------------------------------------------------
+    '- Local Variable Dictionary (alphabetically):              -
+    '- intCol - this will hold the column value                 -
+    '- intRow - this will hold the row value                    -
+    '------------------------------------------------------------
     Private Sub createHeader()
         Dim intRow As Integer = 1
         Dim intCol As Integer = 1
@@ -119,51 +263,103 @@ Module modMain
         For Each header In strHeaders
             anExcel.Cells(intRow, intCol) = header.ToString
             intCol += 1
-            Next
+        Next
     End Sub
+    '------------------------------------------------------------
+    '-                Subprogram Name: createFormulaHeaders     -
+    '------------------------------------------------------------
+    '-                Written By: Nathan Gaffney                -
+    '-                Written On: 6 Apr 2020                    -
+    '------------------------------------------------------------
+    '- Subprogram Purpose:                                      -
+    '-                                                          -
+    '- This subroutine creates a will write the formulas needed -
+    '- to create the aggregrate functions on the columns        -
+    '------------------------------------------------------------
+    '- Parameter Dictionary (in parameter order):               -
+    '- (None)                                                   -
+    '------------------------------------------------------------
+    '- Local Variable Dictionary (alphabetically):              -
+    '- intCol - this will hold the starting column the vertical -
+    '- headers will be placed                                   -
+    '- intCounter - this has two functions, it is the column the-
+    '- data will be entered into and the control for the loop   -
+    '- intLastRowOfData - this is the last row of data, before  -
+    '- the single row gap.                                      -
+    '------------------------------------------------------------
     Private Sub createFormulaHeaders(ByVal intLastRow)
-        Dim intLastRowOfData As Integer = intLastRow '123123124124124124124124
-        Dim intCol = 5
-        Dim intCounter As Integer = 6
-
+        Dim intLastRowOfData As Integer = intLastRow
+        Dim intCol = column.E
+        Dim intColumn As Integer = column.F
+        'Increment intLastRow to create a "blank" row
         intLastRow += 1
+        'Saves time retyping anExcel.Cells
         With anExcel
+            'Create the header
             .Cells(intLastRow, intCol) = "Total:"
-            While intCounter <= 22
-                If intCounter <> 14 Then
-                    .Cells(intLastRow, intCounter) = "=sum(" & getColumnLetter(intCounter) & 1 & ".." & getColumnLetter(intCounter) & intLastRowOfData & ")"
+            'Loop through all remaining columns, except for column 14
+            'which is the empty column.
+            While intColumn <= column.V
+                If intColumn <> column.N Then
+                    'Wirte the formula into the cell referencing the current
+                    'column, 1 serves as the first row (should be 2 because of the header row)
+                    'intLastRowOfData is the cell location where the function will stop
+                    .Cells(intLastRow, intColumn) = "=sum(" & getColumnLetter(intColumn) & 1 & ".." & getColumnLetter(intColumn) & intLastRowOfData & ")"
                 End If
-                intCounter += 1
+                intColumn += 1
             End While
-            intCounter = 6
+            'Reset target column to the column after header
+            intColumn = column.F
+            'Go down one row
             intLastRow += 1
+            'Repeat above logic for each desired type of aggregate function
             .Cells(intLastRow, intCol) = "Max:"
-            While intCounter <= 22
-                If intCounter <> 14 Then
-                    .Cells(intLastRow, intCounter) = "=max(" & getColumnLetter(intCounter) & 1 & ".." & getColumnLetter(intCounter) & intLastRowOfData & ")"
+            While intColumn <= column.V
+                If intColumn <> column.N Then
+                    .Cells(intLastRow, intColumn) = "=max(" & getColumnLetter(intColumn) & 1 & ".." & getColumnLetter(intColumn) & intLastRowOfData & ")"
                 End If
-                intCounter += 1
+                intColumn += 1
             End While
-            intCounter = 6
+            intColumn = column.F
             intLastRow += 1
+
             .Cells(intLastRow, intCol) = "Avg:"
-            While intCounter <= 22
-                If intCounter <> 14 Then
-                    .Cells(intLastRow, intCounter) = "=average(" & getColumnLetter(intCounter) & 1 & ".." & getColumnLetter(intCounter) & intLastRowOfData & ")"
+            While intColumn <= column.V
+                If intColumn <> column.N Then
+                    .Cells(intLastRow, intColumn) = "=average(" & getColumnLetter(intColumn) & 1 & ".." & getColumnLetter(intColumn) & intLastRowOfData & ")"
                 End If
-                intCounter += 1
+                intColumn += 1
             End While
-            intCounter = 6
+            intColumn = column.F
             intLastRow += 1
+
             .Cells(intLastRow, intCol) = "Min:"
-            While intCounter <= 22
-                If intCounter <> 14 Then
-                    .Cells(intLastRow, intCounter) = "=min(" & getColumnLetter(intCounter) & 1 & ".." & getColumnLetter(intCounter) & intLastRowOfData & ")"
+            While intColumn <= column.V
+                If intColumn <> column.N Then
+                    .Cells(intLastRow, intColumn) = "=min(" & getColumnLetter(intColumn) & 1 & ".." & getColumnLetter(intColumn) & intLastRowOfData & ")"
                 End If
-                intCounter += 1
+                intColumn += 1
             End While
         End With
     End Sub
+    '------------------------------------------------------------
+    '-                Subprogram Name: createSalesForce         -
+    '------------------------------------------------------------
+    '-                Written By: Nathan Gaffney                -
+    '-                Written On: 5 Apr 2020                    -
+    '------------------------------------------------------------
+    '- Subprogram Purpose:                                      -
+    '-                                                          -
+    '- This subroutine creates a sales force, represented as a  –
+    '- list of clsSalesPerson, the data for these people is     -
+    '- hard-coded                                               -
+    '------------------------------------------------------------
+    '- Parameter Dictionary (in parameter order):               -
+    '- (None)                                                   -
+    '------------------------------------------------------------
+    '- Local Variable Dictionary (alphabetically):              -
+    '- (None)                                                   -
+    '------------------------------------------------------------
     Private Sub createSalesForce()
         mySalesForce.Add(New clsSalesperson("Robert", "Phillips", 103, 1015, 115.54, 4, 108.15, 3, 102.15, 1, 107.19, 5))
         mySalesForce.Add(New clsSalesperson("Susan", "Ricardo", 98, 1016, 174.15, 6, 132.14, 4, 181.54, 4, 185.67, 5))

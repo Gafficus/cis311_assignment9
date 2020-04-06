@@ -1,4 +1,14 @@
-﻿Module modGlobals
+﻿'------------------------------------------------------------
+'-                File Name : modGlobal.vb                     - 
+'-                Part of Project: Assign9                  -
+'------------------------------------------------------------
+'-                Written By: Nathan Gaffney                -
+'-                Written On: 5 Apr 2020                    -
+'------------------------------------------------------------
+'- File Purpose:                                            -
+'- This file contains the global variable used by the program-                                     - 
+'------------------------------------------------------------	
+Module modGlobals
     Public Enum column
         A = 1
         B
@@ -27,6 +37,40 @@
         Y
         Z
     End Enum
+    Public Enum employee
+        strFirstName = 0
+        strLastName
+        intOrderID
+        intID
+        sngGamesSales
+        intGamesQuantity
+        sngDollsSales
+        intDollsQuantity
+        sngBuildingSales
+        intBuildingQuantity
+        sngModelSales
+        intModelQuantity
+    End Enum
+    '------------------------------------------------------------
+    '-                Subprogram Name: getColumnLetter          -
+    '------------------------------------------------------------
+    '-                Written By: Nathan Gaffney                -
+    '-                Written On: The date you wrote it         -
+    '------------------------------------------------------------
+    '- Subprogram Purpose:                                      -
+    '-                                                          -
+    '- This subroutine is will take in an iteger and retun a    –
+    '- character as a string                                    -
+    '------------------------------------------------------------
+    '- Parameter Dictionary (in parameter order):               -
+    '- intLetter - the integer coming into the program          -
+    '------------------------------------------------------------
+    '- Local Variable Dictionary (alphabetically):              -
+    '- (None)                                                   -
+    '------------------------------------------------------------
+    '- Returns:                                                 -
+    '- letter – holds the cahracter to be returned              -
+    '------------------------------------------------------------
     Public Function getColumnLetter(ByVal intLetter)
         Dim letter As String = "z"
         Select Case intLetter

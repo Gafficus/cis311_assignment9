@@ -1,4 +1,15 @@
-﻿Public Class clsSalesperson
+﻿'------------------------------------------------------------
+'-                File Name : clsSalesPerson.vb             - 
+'-                Part of Project: Assign9                  -
+'------------------------------------------------------------
+'-                Written By: Nathan Gaffney                -
+'-                Written On: 5 Apr 2020                    -
+'------------------------------------------------------------
+'- File Purpose:                                            -
+'- This file contains the logic for creating a class to     -
+'- hold the employee data, and sales figures.               -
+'------------------------------------------------------------	
+Public Class clsSalesperson
     Private strFirstName As String
     Private strLastName As String
     Private intOrderID As Integer
@@ -86,6 +97,7 @@
     Public Sub setIntModelQuantity(ByVal inValue)
         intModelQuantity = inValue
     End Sub
+    'Constructor with all variables being passed to constructor
     Public Sub New(strFirstName As String, strLastName As String, intOrderID As Integer,
                    intID As Integer, sngGamesSales As Single, intGamesQuantity As Integer,
                    sngDollsSales As Single, intDollsQuantity As Integer, sngBuildingSales As Single,
@@ -112,9 +124,4 @@
         Me.intModelQuantity = intModelQuantity
         'Me.sngTotalSales = sngTotalSales
     End Sub
-
-    Public Overrides Function ToString() As String
-        Return strFirstName & " " & strLastName & " " &
-            intOrderID.ToString() & " " & intID & " "
-    End Function
 End Class
