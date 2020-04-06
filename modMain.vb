@@ -1,7 +1,170 @@
 ﻿Imports Microsoft.Office.Interop
 Module modMain
+    Dim anExcel As Excel.Application
+
+    Dim mySalesForce As New List(Of clsSalesperson)
     Sub Main()
-        Dim mySalesForce As New List(Of clsSalesperson)
+        Console.WriteLine("Loading Excel...")
+        anExcel = New Excel.Application()
+        createSalesForce()
+        anExcel.Workbooks.Add()
+        anExcel.Sheets.Add()
+        Console.WriteLine("Writting data to Excel...")
+        createHeader()
+        Dim intLastRow As Integer = createMainData()
+        createFormulaHeaders(intLastRow)
+        createSalesForceSales(intLastRow)
+        createSalesForceQuantity()
+        Console.WriteLine("Opening Excel...")
+        anExcel.Visible = True
+        Console.WriteLine("Press Any Key To Exit.")
+        Console.ReadKey()
+        anExcel.Quit()
+        anExcel = Nothing
+    End Sub
+
+
+    Private Sub createSalesForceSales(ByVal intLastRow)
+
+    End Sub
+    Private Sub createSalesForceQuantity()
+
+    End Sub
+    Private Function createMainData()
+        Dim intRow = 1
+        Dim intCol = 1
+        Dim intColumOfData1 As Integer
+        Dim intColumOfData2 As Integer
+        intRow += 1
+        For Each member In mySalesForce
+            With anExcel
+                .Cells(intRow, intCol) = member.getStrFirstName()
+                intCol += 1
+                .Cells(intRow, intCol) = member.getStrLastName()
+                intCol += 1
+                .Cells(intRow, intCol) = member.getIntOrderID()
+                intCol += 1
+                .Cells(intRow, intCol) = member.getIntID()
+                intCol += 1
+                intCol += 1
+
+                intColumOfData1 = intCol
+                .Cells(intRow, intCol) = member.getSngGamesSales()
+                intCol += 1
+                .Cells(intRow, intCol) = member.getSngDollsSales()
+                intCol += 1
+                .Cells(intRow, intCol) = member.getSngBuildingSales()
+                intCol += 1
+                .Cells(intRow, intCol) = member.getSngModelSales()
+                intCol += 1
+                .Cells(intRow, intCol) = "=sum(" & getColumnLetter(intColumOfData1) & intRow & ".." & getColumnLetter(intColumOfData1 + 3) & intRow & ")"
+                intCol += 1
+                .Cells(intRow, intCol) = "=min(" & getColumnLetter(intColumOfData1) & intRow & ".." & getColumnLetter(intColumOfData1 + 3) & intRow & ")"
+                intCol += 1
+                .Cells(intRow, intCol) = "=average(" & getColumnLetter(intColumOfData1) & intRow & ".." & getColumnLetter(intColumOfData1 + 3) & intRow & ")"
+                intCol += 1
+                .Cells(intRow, intCol) = "=max(" & getColumnLetter(intColumOfData1) & intRow & ".." & getColumnLetter(intColumOfData1 + 3) & intRow & ")"
+                intCol += 1
+                intCol += 1
+                intColumOfData2 = intCol
+                .Cells(intRow, intCol) = member.getIntGamesQuantity()
+                intCol += 1
+                .Cells(intRow, intCol) = member.getIntDollsQuantity()
+                intCol += 1
+                .Cells(intRow, intCol) = member.getIntBuildingQuantity()
+                intCol += 1
+                .Cells(intRow, intCol) = member.getIntModelQuantity()
+                intCol += 1
+                .Cells(intRow, intCol) = "=sum(" & getColumnLetter(intColumOfData2) & intRow & ".." & getColumnLetter(intColumOfData2 + 3) & intRow & ")"
+                intCol += 1
+                .Cells(intRow, intCol) = "=min(" & getColumnLetter(intColumOfData2) & intRow & ".." & getColumnLetter(intColumOfData2 + 3) & intRow & ")"
+                intCol += 1
+                .Cells(intRow, intCol) = "=average(" & getColumnLetter(intColumOfData2) & intRow & ".." & getColumnLetter(intColumOfData2 + 3) & intRow & ")"
+                intCol += 1
+                .Cells(intRow, intCol) = "=max(" & getColumnLetter(intColumOfData2) & intRow & ".." & getColumnLetter(intColumOfData2 + 3) & intRow & ")"
+                intCol += 1
+                intRow += 1
+                intCol = 1
+            End With
+        Next
+        Return intRow
+    End Function
+    Private Sub createHeader()
+        Dim intRow As Integer = 1
+        Dim intCol As Integer = 1
+        Dim strHeaders As New List(Of String)
+        strHeaders.Add("First Name")
+        strHeaders.Add("Last Name")
+        strHeaders.Add("Order ID")
+        strHeaders.Add("Employee ID")
+        strHeaders.Add(" ")
+        strHeaders.Add("Games Sales")
+        strHeaders.Add("Dolls Sales")
+        strHeaders.Add("Build Sales")
+        strHeaders.Add("Model Sales")
+        strHeaders.Add("Total Sale")
+        strHeaders.Add("Min Sales")
+        strHeaders.Add("Avg Sales")
+        strHeaders.Add("Max Sales")
+        strHeaders.Add(" ")
+        strHeaders.Add("Games Qty.")
+        strHeaders.Add("Dolls Qty.")
+        strHeaders.Add("Build Qty.")
+        strHeaders.Add("Model Qty.")
+        strHeaders.Add("Total Qty.")
+        strHeaders.Add("Max Qty.")
+        strHeaders.Add("Avg  Qty.")
+        strHeaders.Add("Min Qty.")
+
+        For Each header In strHeaders
+            anExcel.Cells(intRow, intCol) = header.ToString
+            intCol += 1
+            Next
+    End Sub
+    Private Sub createFormulaHeaders(ByVal intLastRow)
+        Dim intLastRowOfData As Integer = intLastRow '123123124124124124124124
+        Dim intCol = 5
+        Dim intCounter As Integer = 6
+
+        intLastRow += 1
+        With anExcel
+            .Cells(intLastRow, intCol) = "Total:"
+            While intCounter <= 22
+                If intCounter <> 14 Then
+                    .Cells(intLastRow, intCounter) = "=sum(" & getColumnLetter(intCounter) & 1 & ".." & getColumnLetter(intCounter) & intLastRowOfData & ")"
+                End If
+                intCounter += 1
+            End While
+            intCounter = 6
+            intLastRow += 1
+            .Cells(intLastRow, intCol) = "Max:"
+            While intCounter <= 22
+                If intCounter <> 14 Then
+                    .Cells(intLastRow, intCounter) = "=max(" & getColumnLetter(intCounter) & 1 & ".." & getColumnLetter(intCounter) & intLastRowOfData & ")"
+                End If
+                intCounter += 1
+            End While
+            intCounter = 6
+            intLastRow += 1
+            .Cells(intLastRow, intCol) = "Avg:"
+            While intCounter <= 22
+                If intCounter <> 14 Then
+                    .Cells(intLastRow, intCounter) = "=average(" & getColumnLetter(intCounter) & 1 & ".." & getColumnLetter(intCounter) & intLastRowOfData & ")"
+                End If
+                intCounter += 1
+            End While
+            intCounter = 6
+            intLastRow += 1
+            .Cells(intLastRow, intCol) = "Min:"
+            While intCounter <= 22
+                If intCounter <> 14 Then
+                    .Cells(intLastRow, intCounter) = "=min(" & getColumnLetter(intCounter) & 1 & ".." & getColumnLetter(intCounter) & intLastRowOfData & ")"
+                End If
+                intCounter += 1
+            End While
+        End With
+    End Sub
+    Private Sub createSalesForce()
         mySalesForce.Add(New clsSalesperson("Robert", "Phillips", 103, 1015, 115.54, 4, 108.15, 3, 102.15, 1, 107.19, 5))
         mySalesForce.Add(New clsSalesperson("Susan", "Ricardo", 98, 1016, 174.15, 6, 132.14, 4, 181.54, 4, 185.67, 5))
         mySalesForce.Add(New clsSalesperson("William", "Acerba", 203, 1017, 165.34, 4, 193.43, 2, 154.65, 3, 192.23, 4))
@@ -28,14 +191,5 @@ Module modMain
         mySalesForce.Add(New clsSalesperson("Ron", "Zening", 76, 1038, 102.23, 3, 493.34, 3, 495.45, 4, 450.3, 9))
         mySalesForce.Add(New clsSalesperson("Peggy", "Wallis", 199, 1039, 103.43, 3, 394.04, 9, 493.23, 2, 940.2, 2))
         mySalesForce.Add(New clsSalesperson("Amy", "Oloff", 187, 1040, 102.3, 2, 184.03, 4, 103.45, 2, 394.34, 8))
-
-        For Each dude In mySalesForce
-            Console.WriteLine(dude.ToString())
-        Next
-        Dim anExcel As Excel.Application
-        anExcel = New Excel.Application()
-        anExcel.Visible = True
-        Console.ReadKey()
     End Sub
-
 End Module
